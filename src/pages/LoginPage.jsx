@@ -3,15 +3,15 @@ import { Link, useNavigate } from "react-router-dom";
 
 export default function LoginPage({ globalError, onLogin }) {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
   const submit = async (event) => {
     event.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setError("Email and password are required.");
+    if (!identifier.trim() || !password.trim()) {
+      setError("Username/email and password are required.");
       return;
     }
 
@@ -19,7 +19,7 @@ export default function LoginPage({ globalError, onLogin }) {
     setError("");
 
     try {
-      await onLogin({ email, password });
+      await onLogin({ identifier, password });
       navigate("/dashboard");
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "Invalid credentials.";
@@ -36,15 +36,14 @@ export default function LoginPage({ globalError, onLogin }) {
         <p className="mt-2 muted">Continue your competitive exam preparation flow.</p>
 
         <form className="mt-6 space-y-4" onSubmit={submit}>
-          <label className="block" htmlFor="email">
-            <span className="mb-1 block text-sm font-semibold">Email</span>
+          <label className="block" htmlFor="identifier">
+            <span className="mb-1 block text-sm font-semibold">Username or Email</span>
             <input
               className="w-full rounded-xl border border-slate-300/70 bg-white/90 px-4 py-3 dark:border-slate-500/60 dark:bg-slate-800/90"
-              id="email"
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="Enter email"
-              type="email"
-              value={email}
+              id="identifier"
+              onChange={(event) => setIdentifier(event.target.value)}
+              placeholder="Enter username or email"
+              value={identifier}
             />
           </label>
 

@@ -21,7 +21,7 @@ import {
 import {
   fetchUserWorkspace,
   getAuthUserFromSession,
-  signInWithEmail,
+  signInWithIdentifier,
   signOutFromSupabase,
   signUpWithEmail,
   syncUserWorkspace,
@@ -31,12 +31,72 @@ import { hasSupabaseConfig, supabase } from "./utils/supabaseClient";
 import { applyThemeClass } from "./script";
 
 const LOGIN_COUNT_KEY = "asc-login-count-v1";
+const LEGACY_DEMO_CLEANUP_KEY = "asc-legacy-demo-cleaned-v1";
 
 function nextLoginNonce() {
   const rawCount = Number(localStorage.getItem(LOGIN_COUNT_KEY));
   const loginCount = Number.isFinite(rawCount) ? rawCount + 1 : 1;
   localStorage.setItem(LOGIN_COUNT_KEY, String(loginCount));
   return `${Date.now()}-${loginCount}-${Math.floor(Math.random() * 1000000)}`;
+}
+
+function cleanLegacyDemoArtifacts() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  if (localStorage.getItem(LEGACY_DEMO_CLEANUP_KEY) === "1") {
+    return;
+  }
+
+  const blockedNames = new Set(["sakshi", "harshu"]);
+
+  try {
+    const rawSession = localStorage.getItem("asc-session-v1");
+    if (rawSession) {
+      const parsed = JSON.parse(rawSession);
+      const username = String(parsed?.profileUsername || parsed?.username || "")
+        .trim()
+        .toLowerCase();
+      if (blockedNames.has(username)) {
+        localStorage.removeItem("asc-session-v1");
+      }
+    }
+  } catch {
+    localStorage.removeItem("asc-session-v1");
+  }
+
+  try {
+    const rawIdentity = localStorage.getItem("asc-identity-map-v1");
+    if (rawIdentity) {
+      const parsed = JSON.parse(rawIdentity);
+      if (parsed && typeof parsed === "object") {
+        const next = { ...parsed };
+        blockedNames.forEach((name) => {
+          delete next[name];
+        });
+        localStorage.setItem("asc-identity-map-v1", JSON.stringify(next));
+      }
+    }
+  } catch {
+    localStorage.removeItem("asc-identity-map-v1");
+  }
+
+  localStorage.removeItem("asc-local-users-v1");
+
+  try {
+    const rawData = localStorage.getItem("asc-data-v1");
+    if (rawData) {
+      const parsed = JSON.parse(rawData);
+      if (parsed && typeof parsed.seedProfile === "string" && parsed.seedProfile.includes("harshu")) {
+        localStorage.removeItem("asc-data-v1");
+      }
+    }
+  } catch {
+    localStorage.removeItem("asc-data-v1");
+  }
+
+  localStorage.setItem(LEGACY_DEMO_CLEANUP_KEY, "1");
 }
 
 function FullPageLoader({ message = "Loading..." }) {
@@ -60,7 +120,10 @@ function ProtectedRoute({ loading, session, children }) {
 }
 
 export default function App() {
-  const [session, setSession] = useState(loadSession);
+  const [session, setSession] = useState(() => {
+    cleanLegacyDemoArtifacts();
+    return loadSession();
+  });
   const [data, setData] = useState(loadData);
   const [theme, setTheme] = useState(loadTheme);
   const [authLoading, setAuthLoading] = useState(true);
@@ -177,9 +240,9 @@ export default function App() {
     return () => clearTimeout(timeoutId);
   }, [authLoading, data, session?.profileUsername, session?.userId, theme]);
 
-  const onLogin = async ({ email, password }) => {
+  const onLogin = async ({ identifier, password }) => {
     setAuthError("");
-    const { user } = await signInWithEmail({ email, password });
+    const { user } = await signInWithIdentifier({ identifier, password });
     await hydrateWorkspace(user, { freshLogin: true });
     setAuthError("");
   };

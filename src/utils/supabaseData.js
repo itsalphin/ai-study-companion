@@ -3,6 +3,7 @@ import { dateKey } from "./time";
 import { hasSupabaseConfig, supabase } from "./supabaseClient";
 
 const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const IDENTITY_MAP_KEY = "asc-identity-map-v1";
 
 function requireSupabase() {
   if (!hasSupabaseConfig || !supabase) {
@@ -38,6 +39,62 @@ function toDisplayName(raw = "") {
 
 function normalizeUsername(value = "") {
   return String(value || "").trim().toLowerCase();
+}
+
+function normalizeEmail(value = "") {
+  return String(value || "").trim().toLowerCase();
+}
+
+function loadIdentityMap() {
+  if (typeof window === "undefined") {
+    return {};
+  }
+  try {
+    const raw = localStorage.getItem(IDENTITY_MAP_KEY);
+    if (!raw) {
+      return {};
+    }
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveIdentityMap(map) {
+  if (typeof window === "undefined") {
+    return;
+  }
+  localStorage.setItem(IDENTITY_MAP_KEY, JSON.stringify(map));
+}
+
+function rememberIdentity({ email = "", username = "" } = {}) {
+  const normalizedEmail = normalizeEmail(email);
+  const normalizedUsername = normalizeUsername(username);
+  if (!normalizedEmail || !normalizedUsername) {
+    return;
+  }
+  const map = loadIdentityMap();
+  map[normalizedUsername] = normalizedEmail;
+  saveIdentityMap(map);
+}
+
+function resolveEmailFromIdentifier(identifier = "") {
+  const value = String(identifier || "").trim();
+  if (!value) {
+    throw new Error("Email or username is required.");
+  }
+  if (value.includes("@")) {
+    return normalizeEmail(value);
+  }
+
+  const username = normalizeUsername(value);
+  const map = loadIdentityMap();
+  const mapped = map[username];
+  if (!mapped) {
+    throw new Error("Use email once on this device, then you can login with username.");
+  }
+  return normalizeEmail(mapped);
 }
 
 function mapWorkspaceFromRows({ notesRows, profile, sessionRows, testRows, dailyLogRows }) {
@@ -194,10 +251,11 @@ export async function getAuthUserFromSession() {
   return data?.session?.user || null;
 }
 
-export async function signInWithEmail({ email, password }) {
+export async function signInWithIdentifier({ identifier, password }) {
   const client = requireSupabase();
+  const loginEmail = resolveEmailFromIdentifier(identifier);
   const payload = {
-    email: String(email || "").trim().toLowerCase(),
+    email: loginEmail,
     password: String(password || ""),
   };
 
@@ -210,6 +268,10 @@ export async function signInWithEmail({ email, password }) {
   }
 
   const profile = await ensureProfile(data.user);
+  rememberIdentity({
+    email: data.user?.email || loginEmail,
+    username: profile?.username || identifier,
+  });
   return {
     user: data.user,
     profile,
@@ -245,6 +307,11 @@ export async function signUpWithEmail({ email, examMode, fullName, password, use
     throw new Error(error.message);
   }
 
+  rememberIdentity({
+    email: cleanEmail,
+    username: cleanUsername,
+  });
+
   if (!data?.user) {
     throw new Error("Could not create account right now.");
   }
@@ -278,6 +345,10 @@ export async function signOutFromSupabase() {
 export async function fetchUserWorkspace(user) {
   const client = requireSupabase();
   const profile = await ensureProfile(user);
+  rememberIdentity({
+    email: user?.email || "",
+    username: profile?.username || user?.user_metadata?.username || "",
+  });
 
   const [sessionsRes, testRes, dailyRes, notesRes] = await Promise.all([
     client
