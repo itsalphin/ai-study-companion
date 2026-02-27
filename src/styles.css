@@ -1,0 +1,121 @@
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Sora:wght@500;600;700&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-main: #f8f9ff;
+  --bg-soft: #fef7f2;
+  --ink: #2f405f;
+  --ink-muted: #5f6f8f;
+  --panel: rgba(255, 255, 255, 0.86);
+  --line: rgba(165, 180, 214, 0.48);
+}
+
+.dark {
+  --bg-main: #0b1220;
+  --bg-soft: #0f1930;
+  --ink: #e6edff;
+  --ink-muted: #aeb9d8;
+  --panel: rgba(19, 30, 52, 0.85);
+  --line: rgba(120, 141, 190, 0.35);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply font-body antialiased;
+  min-height: 100vh;
+  overflow-x: hidden;
+  color: var(--ink);
+  background: radial-gradient(circle at top right, rgba(253, 186, 220, 0.4), transparent 42%),
+    radial-gradient(circle at bottom left, rgba(186, 230, 253, 0.4), transparent 44%),
+    linear-gradient(180deg, var(--bg-main), var(--bg-soft));
+}
+
+#root {
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.glass-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 30px rgba(86, 113, 170, 0.16);
+  backdrop-filter: blur(7px);
+}
+
+.section-title {
+  @apply font-display text-2xl font-semibold md:text-3xl;
+}
+
+.muted {
+  color: var(--ink-muted);
+}
+
+.gradient-text {
+  background: linear-gradient(95deg, #0891b2, #fb7185, #f59e0b);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.float-slow {
+  animation: float-slow 6s ease-in-out infinite;
+}
+
+.float-fast {
+  animation: float-fast 4.3s ease-in-out infinite;
+}
+
+.clock-hand {
+  transform-origin: 50% 50%;
+  animation: spin 9s linear infinite;
+}
+
+.confetti-piece {
+  animation: confetti-fall 1.7s ease-out forwards;
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes confetti-fall {
+  from {
+    transform: translateY(-130%) rotate(0deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(260%) rotate(360deg);
+    opacity: 0;
+  }
+}
