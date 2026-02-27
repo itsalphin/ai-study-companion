@@ -223,7 +223,15 @@ export default function App() {
   return (
     <Routes>
       <Route
-        element={<LandingPage examMode={data.examMode} onSelectMode={onSelectMode} session={session} />}
+        element={
+          <LandingPage
+            examMode={data.examMode}
+            onSelectMode={onSelectMode}
+            session={session}
+            setTheme={setTheme}
+            theme={theme}
+          />
+        }
         path="/"
       />
       <Route

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import AnimatedHero from "../components/AnimatedHero";
+import ThemeToggle from "../components/ThemeToggle";
 import { smoothScrollTo } from "../script";
 import { EXAM_MODES } from "../utils/examModes";
 
@@ -26,7 +27,7 @@ const features = [
   },
 ];
 
-export default function LandingPage({ onSelectMode, session }) {
+export default function LandingPage({ onSelectMode, session, setTheme, theme }) {
   const navigate = useNavigate();
   const [headline, setHeadline] = useState(0);
 
@@ -54,22 +55,28 @@ export default function LandingPage({ onSelectMode, session }) {
         >
           AI Study Companion
         </button>
-        <nav className="flex flex-wrap gap-2 text-sm font-semibold">
-          {[
-            { id: "features", label: "Features" },
-            { id: "how", label: "How It Works" },
-            { id: "modes", label: "Exam Modes" },
-            { id: "testimonials", label: "Testimonials" },
-          ].map((item) => (
-            <button
-              className="rounded-full bg-white/80 px-3 py-2 transition hover:bg-white dark:bg-slate-800/80 dark:hover:bg-slate-700"
-              key={item.id}
-              onClick={() => smoothScrollTo(item.id)}
-              type="button"
-            >
-              {item.label}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <nav className="flex flex-wrap gap-2 text-sm font-semibold">
+            {[
+              { id: "features", label: "Features" },
+              { id: "how", label: "How It Works" },
+              { id: "modes", label: "Exam Modes" },
+              { id: "testimonials", label: "Testimonials" },
+            ].map((item) => (
+              <button
+                className="rounded-full bg-white/80 px-3 py-2 transition hover:bg-white dark:bg-slate-800/80 dark:hover:bg-slate-700"
+                key={item.id}
+                onClick={() => smoothScrollTo(item.id)}
+                type="button"
+              >
+                {item.label}
+              </button>
+            ))}
+          </nav>
+          <ThemeToggle
+            onToggle={() => setTheme((previous) => (previous === "light" ? "dark" : "light"))}
+            theme={theme}
+          />
           <button
             className="rounded-full bg-sky-500 px-4 py-2 text-white transition hover:bg-sky-600"
             onClick={session ? () => navigate("/dashboard") : goLogin}
@@ -77,7 +84,7 @@ export default function LandingPage({ onSelectMode, session }) {
           >
             {session ? "Open Dashboard" : "Login"}
           </button>
-        </nav>
+        </div>
       </header>
 
       <section className="mx-auto grid w-full max-w-6xl items-center gap-8 md:grid-cols-2" id="hero">
