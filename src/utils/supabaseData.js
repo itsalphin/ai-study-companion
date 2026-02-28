@@ -284,9 +284,19 @@ export async function signInWithIdentifier({ identifier, password }) {
   }
 
   const profile = await ensureProfile(data.user);
+  const metadataUsername = normalizeUsername(data.user?.user_metadata?.username || "");
+  const emailPrefixAlias = normalizeUsername(String(loginEmail).split("@")[0] || "");
   rememberIdentity({
     email: data.user?.email || loginEmail,
     username: profile?.username || identifier,
+  });
+  rememberIdentity({
+    email: data.user?.email || loginEmail,
+    username: metadataUsername,
+  });
+  rememberIdentity({
+    email: data.user?.email || loginEmail,
+    username: emailPrefixAlias,
   });
   return {
     user: data.user,
@@ -361,9 +371,19 @@ export async function signOutFromSupabase() {
 export async function fetchUserWorkspace(user) {
   const client = requireSupabase();
   const profile = await ensureProfile(user);
+  const metadataUsername = normalizeUsername(user?.user_metadata?.username || "");
+  const emailPrefixAlias = normalizeUsername(String(user?.email || "").split("@")[0] || "");
   rememberIdentity({
     email: user?.email || "",
     username: profile?.username || user?.user_metadata?.username || "",
+  });
+  rememberIdentity({
+    email: user?.email || "",
+    username: metadataUsername,
+  });
+  rememberIdentity({
+    email: user?.email || "",
+    username: emailPrefixAlias,
   });
 
   const [sessionsRes, testRes, dailyRes, notesRes] = await Promise.all([

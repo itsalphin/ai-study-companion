@@ -12,9 +12,11 @@ declare
 begin
   select u.email
   into v_email
-  from public.profiles p
-  join auth.users u on u.id = p.user_id
-  where lower(p.username) = lower(trim(p_username))
+  from auth.users u
+  left join public.profiles p on p.user_id = u.id
+  where lower(coalesce(p.username, '')) = lower(trim(p_username))
+     or lower(coalesce(u.raw_user_meta_data ->> 'username', '')) = lower(trim(p_username))
+     or lower(split_part(coalesce(u.email, ''), '@', 1)) = lower(trim(p_username))
   limit 1;
 
   return v_email;
