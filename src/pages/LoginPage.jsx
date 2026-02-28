@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
+const LOGIN_TIMEOUT_MS = 20000;
+
 export default function LoginPage({ globalError, onLogin }) {
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
@@ -17,14 +19,24 @@ export default function LoginPage({ globalError, onLogin }) {
 
     setSubmitting(true);
     setError("");
+    let timeoutId;
 
     try {
-      await onLogin({ identifier, password });
+      await Promise.race([
+        onLogin({ identifier, password }),
+        new Promise((_, reject) => {
+          timeoutId = setTimeout(
+            () => reject(new Error("Login timed out. Check internet and try again.")),
+            LOGIN_TIMEOUT_MS,
+          );
+        }),
+      ]);
       navigate("/dashboard");
     } catch (submitError) {
       const message = submitError instanceof Error ? submitError.message : "Invalid credentials.";
       setError(message);
     } finally {
+      clearTimeout(timeoutId);
       setSubmitting(false);
     }
   };
