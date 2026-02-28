@@ -79,7 +79,7 @@ function rememberIdentity({ email = "", username = "" } = {}) {
   saveIdentityMap(map);
 }
 
-function resolveEmailFromIdentifier(identifier = "") {
+async function resolveEmailFromIdentifier(client, identifier = "") {
   const value = String(identifier || "").trim();
   if (!value) {
     throw new Error("Email or username is required.");
@@ -92,7 +92,23 @@ function resolveEmailFromIdentifier(identifier = "") {
   const map = loadIdentityMap();
   const mapped = map[username];
   if (!mapped) {
-    throw new Error("Use email once on this device, then you can login with username.");
+    const { data, error } = await client.rpc("lookup_login_email", {
+      p_username: username,
+    });
+    if (error) {
+      throw new Error("Invalid credentials. Check username/email and password.");
+    }
+
+    const resolvedEmail = typeof data === "string" ? data : "";
+    if (!resolvedEmail) {
+      throw new Error("Invalid credentials. Check username/email and password.");
+    }
+
+    rememberIdentity({
+      email: resolvedEmail,
+      username,
+    });
+    return normalizeEmail(resolvedEmail);
   }
   return normalizeEmail(mapped);
 }
@@ -253,7 +269,7 @@ export async function getAuthUserFromSession() {
 
 export async function signInWithIdentifier({ identifier, password }) {
   const client = requireSupabase();
-  const loginEmail = resolveEmailFromIdentifier(identifier);
+  const loginEmail = await resolveEmailFromIdentifier(client, identifier);
   const payload = {
     email: loginEmail,
     password: String(password || ""),
