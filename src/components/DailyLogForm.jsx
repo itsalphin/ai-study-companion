@@ -110,7 +110,7 @@ export default function DailyLogForm({ value, onSave }) {
   };
 
   return (
-    <section className="glass-card rounded-2xl p-5">
+    <section className="glass-card min-w-0 overflow-x-hidden rounded-2xl p-5">
       <h3 className="font-display text-xl font-semibold">Daily Log</h3>
       <p className="mt-1 text-sm muted">Track multiple study and break intervals across the day.</p>
 
@@ -118,7 +118,7 @@ export default function DailyLogForm({ value, onSave }) {
         <label className="block" htmlFor="wakeUp">
           <span className="mb-1 block text-sm font-semibold">Wake-up Time</span>
           <input
-            className="w-full rounded-xl border border-slate-300/70 bg-white/90 px-4 py-2.5 dark:border-slate-500/60 dark:bg-slate-800/90"
+            className="w-full max-w-full rounded-xl border border-slate-300/70 bg-white/90 px-4 py-2.5 dark:border-slate-500/60 dark:bg-slate-800/90"
             id="wakeUp"
             name="wakeUp"
             onChange={onChange}

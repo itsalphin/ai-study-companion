@@ -47,7 +47,7 @@ export default function LandingPage({ onSelectMode, session, setTheme, theme }) 
 
   return (
     <div className="px-4 pb-16 pt-5 md:px-8">
-      <header className="glass-card mx-auto mb-7 flex w-full max-w-6xl flex-wrap items-center justify-between gap-3 rounded-2xl p-4">
+      <header className="glass-card mx-auto mb-7 flex w-full max-w-6xl flex-col items-stretch gap-3 rounded-2xl p-4 md:flex-row md:items-center md:justify-between">
         <button
           className="font-display text-left text-xl font-semibold"
           onClick={() => smoothScrollTo("hero")}
@@ -55,8 +55,8 @@ export default function LandingPage({ onSelectMode, session, setTheme, theme }) 
         >
           AI Study Companion
         </button>
-        <div className="flex flex-wrap items-center justify-end gap-2">
-          <nav className="flex flex-wrap gap-2 text-sm font-semibold">
+        <div className="flex w-full flex-wrap items-center gap-2 md:w-auto md:justify-end">
+          <nav className="flex w-full flex-wrap gap-2 text-sm font-semibold md:w-auto">
             {[
               { id: "features", label: "Features" },
               { id: "how", label: "How It Works" },
