@@ -7,6 +7,7 @@ export default function LoginPage({ globalError, onLogin }) {
   const navigate = useNavigate();
   const [identifier, setIdentifier] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -61,14 +62,54 @@ export default function LoginPage({ globalError, onLogin }) {
 
           <label className="block" htmlFor="password">
             <span className="mb-1 block text-sm font-semibold">Password</span>
-            <input
-              className="w-full rounded-xl border border-slate-300/70 bg-white/90 px-4 py-3 dark:border-slate-500/60 dark:bg-slate-800/90"
-              id="password"
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="Enter password"
-              type="password"
-              value={password}
-            />
+            <div className="relative">
+              <input
+                className="w-full rounded-xl border border-slate-300/70 bg-white/90 px-4 py-3 pr-12 dark:border-slate-500/60 dark:bg-slate-800/90"
+                id="password"
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="Enter password"
+                type={showPassword ? "text" : "password"}
+                value={password}
+              />
+              <button
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 dark:text-slate-300 dark:hover:bg-slate-700/70 dark:hover:text-slate-100"
+                onClick={() => setShowPassword((previous) => !previous)}
+                type="button"
+              >
+                {showPassword ? (
+                  <svg
+                    aria-hidden="true"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.8"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M3 3l18 18" />
+                    <path d="M10.58 10.58a2 2 0 102.83 2.83" />
+                    <path d="M9.88 4.24A10.7 10.7 0 0112 4c5.15 0 9.27 3.39 10.5 8-1.15 4.28-4.86 7.49-9.5 7.95" />
+                    <path d="M6.12 6.12C4.35 7.38 3.02 9.22 2 12c.5 1.84 1.5 3.45 2.87 4.69" />
+                  </svg>
+                ) : (
+                  <svg
+                    aria-hidden="true"
+                    className="h-5 w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="1.8"
+                    viewBox="0 0 24 24"
+                  >
+                    <path d="M2 12s3.5-8 10-8 10 8 10 8-3.5 8-10 8-10-8-10-8z" />
+                    <circle cx="12" cy="12" r="3" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </label>
 
           {globalError ? <p className="text-sm font-semibold text-rose-600">{globalError}</p> : null}
